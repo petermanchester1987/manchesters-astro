@@ -1,0 +1,32 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title="Thanks for your enquiry"
+  description="Thanks for getting in touch with The Manchesters — we'll be in touch soon."
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow">Enquiry sent</p>
+      <h1>Thanks — we'll be in touch soon.</h1>
+      <p class="lede">
+        We've received your enquiry and will come back to you with availability, tech
+        requirements, and which of our shows fits best.
+      </p>
+      <a class="button button--primary" href="/">Back to home</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-top: 3rem;
+  }
+
+  .lede {
+    margin-bottom: 2rem;
+  }
+</style>

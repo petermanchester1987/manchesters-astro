@@ -3,10 +3,19 @@
 // form ID, not a secret) — it identifies where submissions get emailed,
 // nothing more. Get one at https://web3forms.com (no account needed).
 const web3formsAccessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY;
+
+// A plain native form POST rather than a fetch()-based submission: the
+// free/no-signup Web3Forms key doesn't return CORS headers for
+// cross-origin fetch, which silently blocks an AJAX submission in every
+// browser — a full-page form POST isn't subject to CORS at all, so it
+// works regardless of that restriction.
+const thanksUrl = new URL('/contact/thanks', Astro.site).toString();
 ---
 
-<form class="enquiry" data-enquiry-form novalidate>
+<form class="enquiry" action="https://api.web3forms.com/submit" method="POST">
   <input type="hidden" name="access_key" value={web3formsAccessKey} />
+  <input type="hidden" name="subject" value="New booking enquiry — The Manchesters website" />
+  <input type="hidden" name="redirect" value={thanksUrl} />
   <div class="row">
     <div class="field">
       <label for="name">Name</label>
@@ -46,7 +55,6 @@ const web3formsAccessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY;
   <input type="checkbox" name="botcheck" class="visually-hidden" style="display:none" tabindex="-1" autocomplete="off" />
 
   <button type="submit" class="button button--primary">Send enquiry</button>
-  <p class="status" role="status" aria-live="polite"></p>
 </form>
 
 <style>
@@ -91,55 +99,9 @@ const web3formsAccessKey = import.meta.env.PUBLIC_WEB3FORMS_ACCESS_KEY;
     resize: vertical;
   }
 
-  .status {
-    color: var(--text-dim);
-    font-size: 0.9rem;
-  }
-
   @media (max-width: 640px) {
     .row {
       grid-template-columns: 1fr;
     }
   }
 </style>
-
-<script>
-  const form = document.querySelector<HTMLFormElement>('[data-enquiry-form]');
-
-  form?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const status = form.querySelector<HTMLParagraphElement>('.status');
-    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-    const formData = new FormData(form);
-
-    if (status) status.textContent = 'Sending…';
-    if (button) button.disabled = true;
-
-    const name = formData.get('name');
-    const organisation = formData.get('organisation');
-    formData.set('subject', `Booking enquiry from ${name}${organisation ? ` (${organisation})` : ''}`);
-
-    try {
-      // Web3Forms only enables CORS for JSON bodies — a FormData/
-      // multipart request gets silently blocked by the browser before
-      // it even reaches their server.
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify(Object.fromEntries(formData)),
-      });
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        form.reset();
-        if (status) status.textContent = "Thanks — we'll be in touch soon.";
-      } else {
-        if (status) status.textContent = result.message ?? 'Something went wrong. Please email us directly.';
-      }
-    } catch {
-      if (status) status.textContent = 'Something went wrong. Please email us directly.';
-    } finally {
-      if (button) button.disabled = false;
-    }
-  });
-</script>
