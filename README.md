@@ -53,18 +53,18 @@ frontmatter (schema in `src/content/config.ts`):
   `src/assets/clients/` and reference them via the `logo` field** for
   crisper rendering.
 
-## Forms and Brevo
+## Forms
 
-Both forms are plain HTML forms enhanced with a small fetch-based script
-(no client library needed), posting to Astro API routes that run as Vercel
-serverless functions (`export const prerender = false`):
+The two forms use different backends:
 
-- `src/pages/api/newsletter.ts` — adds the email to a Brevo list
+- `src/components/NewsletterSignup.astro` posts to
+  `src/pages/api/newsletter.ts`, a Vercel serverless function
+  (`export const prerender = false`) that adds the email to a Brevo list
   (`POST /v3/contacts`).
-- `src/pages/api/enquiry.ts` — sends the booking enquiry to
-  `BOOKINGS_EMAIL` via Brevo's transactional email API
-  (`POST /v3/smtp/email`), using the visitor's address as `replyTo` so you
-  can just hit reply.
+- `src/components/EnquiryForm.astro` posts straight from the browser to
+  Web3Forms (`POST https://api.web3forms.com/submit`) — no server code
+  involved, so there's no `api/enquiry` route. Web3Forms emails the
+  submission to whichever address the access key is registered to.
 
 Required environment variables (see `.env.example`):
 
@@ -72,11 +72,12 @@ Required environment variables (see `.env.example`):
 | --- | --- |
 | `BREVO_API_KEY` | Brevo → Settings → SMTP & API → API keys |
 | `BREVO_LIST_ID` | Brevo → Contacts → Lists → open a list → number in the URL |
-| `BREVO_SENDER_EMAIL` | A verified sender in Brevo → Senders, Domains & Dedicated IPs |
-| `BOOKINGS_EMAIL` | Where enquiries should land, e.g. bookings@the-manchesters.com |
+| `PUBLIC_WEB3FORMS_ACCESS_KEY` | web3forms.com — enter the destination email, no account needed |
 
 Set these in Vercel under **Project Settings → Environment Variables**
-(and locally in `.env`, which is gitignored).
+(and locally in `.env`, which is gitignored). `PUBLIC_WEB3FORMS_ACCESS_KEY`
+is meant to be public — it's submitted from client-side JS — while
+`BREVO_API_KEY` must stay server-only.
 
 ## Deploying to Vercel
 

@@ -4,9 +4,7 @@
 interface ImportMetaEnv {
   readonly BREVO_API_KEY: string;
   readonly BREVO_LIST_ID: string;
-  readonly BREVO_SENDER_EMAIL: string;
-  readonly BREVO_SENDER_NAME: string;
-  readonly BOOKINGS_EMAIL: string;
+  readonly PUBLIC_WEB3FORMS_ACCESS_KEY: string;
 }
 
 interface ImportMeta {
