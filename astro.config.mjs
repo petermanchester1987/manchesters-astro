@@ -14,6 +14,16 @@ export default defineConfig({
   image: {
     // Sharp is the default and only image service used for astro:assets
     // processing (resizing, format conversion to webp/avif, etc).
+    // `layout: 'constrained'` turns on responsive images site-wide: every
+    // <Image> now gets a real srcset of multiple resolutions plus a
+    // `sizes` attribute, so a phone downloads a phone-sized file instead
+    // of the same full desktop-resolution image everyone else gets —
+    // without this, every <Image> renders as a single fixed-size file
+    // with no srcset at all. Full-bleed hero backgrounds override this
+    // per-instance with layout="full-width" (see HeroVideo.astro and
+    // index.astro's hero image).
+    layout: 'constrained',
+    responsiveStyles: true,
   },
 
   // Astro's built-in Fonts API: self-hosts the fonts, preloads them, and

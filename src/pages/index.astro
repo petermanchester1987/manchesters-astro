@@ -19,7 +19,7 @@ const shows = (await getCollection('shows', ({ data }) => data.published)).sort(
   description="The Manchesters are West End performers presenting The Story of Fleetwood Mac, The Story of Queen and Tribute Mad as guest entertainers aboard cruise ships and in theatres."
 >
   <section class="hero">
-    <Image src={heroImage} alt="Rachel and Peter Manchester performing live under stage lighting" class="hero-image" width={1800} height={1200} priority />
+    <Image src={heroImage} alt="Rachel and Peter Manchester performing live under stage lighting" class="hero-image" width={1800} height={1200} layout="full-width" priority />
     <div class="spotlight spotlight--one" aria-hidden="true"></div>
     <div class="spotlight spotlight--two" aria-hidden="true"></div>
     <div class="hero-scrim"></div>

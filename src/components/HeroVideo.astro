@@ -18,7 +18,7 @@ const hasVideo = Boolean(webm || mp4);
 ---
 
 <div class="hero-media">
-  <Image src={poster} alt={posterAlt} width={1800} height={1200} class="hero-media-image" priority />
+  <Image src={poster} alt={posterAlt} width={1800} height={1200} class="hero-media-image" layout="full-width" priority />
 
   {hasVideo && (
     <video

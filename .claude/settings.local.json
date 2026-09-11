@@ -4,7 +4,8 @@
       "Bash",
       "Bash(npx astro *)",
       "Bash(grep -o '\"text\":\"[^\"]*font[^\"]*\"' /Users/petermanchester/.claude/projects/-Users-petermanchester-Projects-upbeats-astro/c83f22b6-b611-4fe0-9229-18989c88def2.jsonl 2>/dev/null | head -20 *)",
-      "Read(//Users/petermanchester/.claude/projects/-Users-petermanchester-Projects-upbeats-astro/**)"
+      "Read(//Users/petermanchester/.claude/projects/-Users-petermanchester-Projects-upbeats-astro/**)",
+      "WebFetch(domain:docs.astro.build)"
     ]
   }
 }
