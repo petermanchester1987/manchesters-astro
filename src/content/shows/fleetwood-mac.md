@@ -14,8 +14,6 @@ songs:
   - "Don't Stop"
 posterImage: "../../assets/shows/fleetwood-mac-landscape.jpeg"
 posterImageAlt: "The Story of Fleetwood Mac poster, black and cream, with the Fleetwood Mac tribute logotype and silhouettes of Rachel and Peter Manchester performing"
-duoImage: "../../assets/shows/fleetwood-mac-poster.jpg"
-duoImageAlt: "Rachel and Peter Manchester in the story of Fleetwood Mac poster. Quotes on the poster include 'The best two person show we've ever seen' from the NCL Epic and 'Rachel has the voice of an angel. Incredible songs and an amazing story' from P&O Ventura"
 promoVideoId: "zytc3-ONvpY"
 accompanyingShows: ["queen", "tribute-mad"]
 order: 1

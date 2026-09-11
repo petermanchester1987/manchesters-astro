@@ -186,7 +186,10 @@ const hasVideo = Boolean(webm || mp4);
   const connection = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } })
     .connection;
   const saveData = Boolean(connection?.saveData);
-  const isSlowConnection = Boolean(connection?.effectiveType && /^(slow-2g|2g)$/.test(connection.effectiveType));
+  // Includes '3g': on a throttled connection Chromium reports this (not
+  // '2g'/'slow-2g') for speeds that still take 40-80+ seconds to pull down
+  // a multi-megabyte video — the exact case this guard exists to avoid.
+  const isSlowConnection = Boolean(connection?.effectiveType && /^(slow-2g|2g|3g)$/.test(connection.effectiveType));
 
   if (!prefersReducedMotion && !saveData && !isSlowConnection) {
     document.querySelectorAll<HTMLVideoElement>('[data-hero-video]').forEach((video) => {
@@ -207,9 +210,31 @@ const hasVideo = Boolean(webm || mp4);
       }
 
       video.load();
+
+      // Belt-and-braces beyond the effectiveType check above: Safari and
+      // Firefox don't implement the Network Information API at all (so
+      // isSlowConnection is always false there regardless of actual
+      // speed), and effectiveType is only ever a rough heuristic anyway.
+      // If playback hasn't actually started within a few seconds, cancel
+      // the in-flight download rather than let a multi-megabyte file
+      // keep silently consuming a slow connection's bandwidth in the
+      // background — the poster image stays the permanent visual.
+      let settled = false;
+      const giveUpTimer = window.setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        video.pause();
+        video.querySelectorAll('source').forEach((s) => s.remove());
+        video.removeAttribute('src');
+        video.load();
+      }, 6000);
+
       video
         .play()
         .then(() => {
+          if (settled) return; // timed out right as it started — leave it stopped
+          settled = true;
+          window.clearTimeout(giveUpTimer);
           video.classList.add('is-playing');
 
           const toggle = video.parentElement?.querySelector<HTMLButtonElement>('[data-hero-video-toggle]');
@@ -241,6 +266,8 @@ const hasVideo = Boolean(webm || mp4);
         .catch(() => {
           // Autoplay blocked (low-power mode, some mobile browsers) —
           // the poster image underneath is already the full visual.
+          settled = true;
+          window.clearTimeout(giveUpTimer);
         });
     });
   }

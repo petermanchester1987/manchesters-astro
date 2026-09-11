@@ -16,8 +16,6 @@ songs:
   - "Don't Stop Me Now"
 posterImage: "../../assets/shows/queen-landscape.jpeg"
 posterImageAlt: "The Story of Queen logotype in gold, with a gold crown above the words, on a black background"
-duoImage: "../../assets/shows/queen-landscape.jpeg"
-duoImageAlt: "The Story of Queen logotype in gold, with a gold crown above the words, on a black background"
 promoVideoId: "lfkfIpMOXII"
 accompanyingShows: ["fleetwood-mac", "tribute-mad"]
 order: 2

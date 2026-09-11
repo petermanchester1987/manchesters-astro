@@ -88,8 +88,8 @@ const heroMp4 = existsSync(`${videoDir}${show.id}.mp4`) ? `/videos/${show.id}.mp
 
   {duoImage && (
     <section class="show-photo">
-      <div class="wrap">
-        <Image src={duoImage} alt={duoImageAlt ?? title} width={1200} height={800} />
+      <div class="wrap photo-wrap">
+        <Image src={duoImage} alt={duoImageAlt ?? title} width={800} height={533} />
       </div>
     </section>
   )}
@@ -179,6 +179,12 @@ const heroMp4 = existsSync(`${videoDir}${show.id}.mp4`) ? `/videos/${show.id}.mp
     border-bottom: 1px solid var(--border);
     font-size: 0.95rem;
     color: var(--text-dim);
+  }
+
+  /* Same cap as .video-wrap above, so the photo and the promo video read
+     as the same size on the page. */
+  .photo-wrap {
+    max-width: 50rem;
   }
 
   .show-photo :global(img) {
