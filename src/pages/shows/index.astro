@@ -1,0 +1,142 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ShowCard from '../../components/ShowCard.astro';
+
+export const prerender = true;
+
+const shows = (await getCollection('shows', ({ data }) => data.published)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+// The two headline "Story of" shows get top billing; anything else
+// (currently just Tribute Mad) is listed below as a smaller, equally
+// clickable option.
+const [featured, rest] = [shows.slice(0, 2), shows.slice(2)];
+---
+
+<BaseLayout
+  title="Our shows"
+  description="The Story of Fleetwood Mac, The Story of Queen and Tribute Mad — The Manchesters' headline shows for cruise ships and theatres."
+>
+  <section class="page-hero">
+    <div class="spotlight spotlight--one" aria-hidden="true"></div>
+    <div class="spotlight spotlight--two" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="page-hero-copy">
+        <p class="eyebrow">The shows</p>
+        <h1>Three headline shows, for <span class="accent-word">unforgettable</span> entertainment.</h1>
+        <p class="lede">
+          The Story Of Fleetwood Mac and The Story of Queen shows built from years of research, plus a lighter
+          compiliation comedy Tribute Mad.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="featured-shows">
+    <div class="wrap featured-grid">
+      {featured.map((show) => <ShowCard show={show} />)}
+    </div>
+  </section>
+
+  {rest.length > 0 && (
+    <section class="more-shows">
+      <div class="wrap">
+        <p class="eyebrow">More shows</p>
+        <div class="more-grid">
+          {rest.map((show) => <ShowCard show={show} />)}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-top: 3rem;
+  }
+
+  .page-hero-copy {
+    position: relative;
+    max-width: 46rem;
+  }
+
+  /* Two soft, slow-drifting gel lights — the same "arena rock poster"
+     spotlight treatment as the homepage hero, filling the open space
+     beside the hero copy on wide screens instead of leaving it bare. */
+  .spotlight {
+    position: absolute;
+    width: 28rem;
+    height: 28rem;
+    border-radius: 50%;
+    filter: blur(70px);
+    mix-blend-mode: screen;
+    opacity: 0.24;
+    pointer-events: none;
+  }
+
+  /* Fixed rem offsets (not percentages) so the glow lands in the same
+     visible spot regardless of how tall the heading makes this
+     section — a percentage-based offset would get pushed mostly out
+     of view whenever the heading wraps to extra lines. */
+  .spotlight--one {
+    top: 1rem;
+    right: -6rem;
+    background: radial-gradient(circle, var(--coral), transparent 70%);
+    animation: page-hero-drift-one 24s ease-in-out infinite;
+  }
+
+  .spotlight--two {
+    top: 12rem;
+    right: 4rem;
+    background: radial-gradient(circle, var(--cyan), transparent 70%);
+    animation: page-hero-drift-two 28s ease-in-out infinite;
+  }
+
+  @keyframes page-hero-drift-one {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-5%, 8%);
+    }
+  }
+
+  @keyframes page-hero-drift-two {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(6%, -8%);
+    }
+  }
+
+  .featured-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .more-shows {
+    padding-top: 0;
+  }
+
+  .more-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.75rem;
+    margin-top: 2.5rem;
+    max-width: 24rem;
+  }
+
+  @media (max-width: 780px) {
+    .featured-grid {
+      grid-template-columns: 1fr;
+      max-width: 24rem;
+      margin-inline: auto;
+    }
+  }
+</style>

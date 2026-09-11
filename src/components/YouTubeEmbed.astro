@@ -1,0 +1,159 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+
+interface Props {
+  /** The YouTube video ID (the part after `v=` or `youtu.be/`). */
+  id: string;
+  /** Used as the accessible label, the iframe title, and (with `description`) the JSON-LD video name. */
+  title: string;
+  /** Optional — enables VideoObject structured data for search/rich-result eligibility. */
+  description?: string;
+  /** Optional ISO 8601 date, e.g. "2024-06-01". Recommended by Google when `description` is set. */
+  uploadDate?: string;
+  /**
+   * Optional local, Astro-optimized poster image to use instead of YouTube's own
+   * hosted thumbnail. Prefer this for a hero/featured video; the hosted thumbnail
+   * (one small lazy-loaded request, no player JS) is fine for most other spots.
+   */
+  thumbnail?: ImageMetadata;
+  aspectRatio?: string;
+}
+
+const {
+  id,
+  title,
+  description,
+  uploadDate,
+  thumbnail,
+  aspectRatio = '16 / 9',
+} = Astro.props;
+
+const hostedThumbnail = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+const embedUrl = `https://www.youtube-nocookie.com/embed/${id}`;
+
+const videoSchema = description
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      name: title,
+      description,
+      thumbnailUrl: [hostedThumbnail],
+      embedUrl,
+      uploadDate,
+    }
+  : null;
+---
+
+<div class="yt-embed" style={`--yt-ratio: ${aspectRatio}`}>
+  <button
+    type="button"
+    class="yt-facade"
+    data-yt-facade
+    data-id={id}
+    data-title={title}
+    aria-label={`Play video: ${title}`}
+  >
+    {thumbnail ? (
+      <Image src={thumbnail} alt="" width={800} height={450} loading="lazy" />
+    ) : (
+      <img src={hostedThumbnail} alt="" loading="lazy" decoding="async" width="480" height="360" />
+    )}
+    <span class="yt-play" aria-hidden="true">
+      <svg viewBox="0 0 68 48" width="68" height="48">
+        <path
+          d="M66.5 7.7c-.8-2.9-2.4-5-5.3-5.9C55.8.2 34 0 34 0S12.2.2 6.8 1.8c-2.9.9-4.5 3-5.3 5.9C0 13.1 0 24 0 24s0 10.9 1.5 16.3c.8 2.9 2.4 4.9 5.3 5.8C12.2 47.8 34 48 34 48s21.8-.2 27.2-1.8c2.9-.9 4.5-2.9 5.3-5.8C68 34.9 68 24 68 24s0-10.9-1.5-16.3z"
+          fill="var(--coral)"
+        />
+        <path d="M45 24 27 14v20" fill="#fff" />
+      </svg>
+    </span>
+  </button>
+</div>
+
+{videoSchema && (
+  <script type="application/ld+json" set:html={JSON.stringify(videoSchema)} />
+)}
+
+<style>
+  .yt-embed {
+    position: relative;
+    aspect-ratio: var(--yt-ratio, 16 / 9);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .yt-facade {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+    background: none;
+  }
+
+  .yt-facade :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease, filter 0.4s ease;
+  }
+
+  .yt-facade:hover :global(img),
+  .yt-facade:focus-visible :global(img) {
+    transform: scale(1.04);
+    filter: brightness(0.85);
+  }
+
+  .yt-play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .yt-play svg {
+    width: clamp(48px, 8vw, 68px);
+    height: auto;
+    filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.5));
+    transition: transform 0.2s ease;
+  }
+
+  .yt-facade:hover .yt-play svg,
+  .yt-facade:focus-visible .yt-play svg {
+    transform: scale(1.08);
+  }
+
+  .yt-embed :global(iframe) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+</style>
+
+<script>
+  // Click-to-load facade: defers YouTube's player JS, cookies, and network
+  // requests until the visitor actually wants to watch — the thumbnail
+  // above is the only cost paid on page load. One delegated listener
+  // handles every embed on the page, however many there are.
+  document.addEventListener('click', (event) => {
+    const facade = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-yt-facade]');
+    if (!facade) return;
+
+    const { id, title } = facade.dataset;
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0`;
+    iframe.title = title ?? 'YouTube video';
+    iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    iframe.allowFullscreen = true;
+    facade.replaceWith(iframe);
+  });
+</script>

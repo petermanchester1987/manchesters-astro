@@ -1,0 +1,101 @@
+---
+interface Props {
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+// The footer renders this on every page, and some pages (e.g. the
+// homepage) also embed a second, non-compact instance — a fixed id
+// would collide and break the <label for> association for one of them.
+const emailId = compact ? 'newsletter-email-compact' : 'newsletter-email';
+---
+
+<form class:list={['newsletter', { 'newsletter--compact': compact }]} data-newsletter-form novalidate>
+  <div class="field">
+    <label for={emailId} class="visually-hidden">Email address</label>
+    <input
+      id={emailId}
+      name="email"
+      type="email"
+      required
+      placeholder="name@email.com"
+      autocomplete="email"
+    />
+    <button type="submit" class="button button--primary">Sign up</button>
+  </div>
+  <!-- Honeypot: real visitors never fill this in; bots often do. -->
+  <input type="text" name="company_website" class="visually-hidden" tabindex="-1" autocomplete="off" />
+  <p class="status" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  .newsletter .field {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .newsletter input[type="email"] {
+    /* flex-basis (not min-width) expresses "prefer 14rem" without
+       blocking the input from shrinking further in a tight column —
+       flex items also default to min-width: auto otherwise, which
+       would stop this shrinking below its intrinsic content width. */
+    flex: 1 1 14rem;
+    min-width: 0;
+    padding: 0.85em 1.1em;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: rgba(244, 242, 236, 0.06);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+  }
+
+  .newsletter input[type="email"]::placeholder {
+    color: var(--text-dim);
+  }
+
+  .newsletter .status {
+    margin: 0.6rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  .newsletter--compact .field {
+    max-width: 26rem;
+  }
+</style>
+
+<script>
+  const forms = document.querySelectorAll<HTMLFormElement>('[data-newsletter-form]');
+
+  forms.forEach((form) => {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const status = form.querySelector<HTMLParagraphElement>('.status');
+      const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+      const formData = new FormData(form);
+
+      if (status) status.textContent = 'Signing up…';
+      if (button) button.disabled = true;
+
+      try {
+        const response = await fetch('/api/newsletter', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          form.reset();
+          if (status) status.textContent = result.message ?? "You're on the list — thank you!";
+        } else {
+          if (status) status.textContent = result.message ?? 'Something went wrong. Please try again.';
+        }
+      } catch {
+        if (status) status.textContent = 'Something went wrong. Please try again.';
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+  });
+</script>

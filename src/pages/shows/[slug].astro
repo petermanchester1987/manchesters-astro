@@ -1,0 +1,230 @@
+---
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { getCollection, getEntry, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TestimonialCard from '../../components/TestimonialCard.astro';
+import YouTubeEmbed from '../../components/YouTubeEmbed.astro';
+import HeroVideo from '../../components/HeroVideo.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const shows = await getCollection('shows', ({ data }) => data.published);
+  return shows.map((show) => ({
+    params: { slug: show.id },
+    props: { show },
+  }));
+}
+
+const { show } = Astro.props;
+const { Content } = await render(show);
+const {
+  title,
+  shortTitle,
+  tagline,
+  accent,
+  durationMinutes,
+  songs,
+  posterImage,
+  posterImageAlt,
+  duoImage,
+  duoImageAlt,
+  promoVideoId,
+  accompanyingShows,
+} = show.data;
+
+const accompanying = await Promise.all(accompanyingShows.map((ref) => getEntry(ref)));
+const testimonials = await getCollection('testimonials', (t) => t.data.show?.id === show.id);
+
+// Accent the show's short name within the full title, e.g.
+// "The Story of " + "Fleetwood Mac" (in coral), matching the hero
+// treatment on the homepage.
+const titlePrefix = title.endsWith(shortTitle) ? title.slice(0, title.length - shortTitle.length) : '';
+
+// Convention over configuration: drop `<slug>.webm` / `<slug>.mp4` into
+// public/videos/ and the hero picks them up automatically, no frontmatter
+// or code changes needed. Until then (or if only one format is added),
+// HeroVideo falls back to the poster image alone.
+const videoDir = fileURLToPath(new URL('../../../public/videos/', import.meta.url));
+const heroWebm = existsSync(`${videoDir}${show.id}.webm`) ? `/videos/${show.id}.webm` : undefined;
+const heroMp4 = existsSync(`${videoDir}${show.id}.mp4`) ? `/videos/${show.id}.mp4` : undefined;
+---
+
+<BaseLayout title={title} description={tagline} bodyClass={`accent-${accent}`}>
+  <section class="show-hero">
+    <HeroVideo poster={posterImage} posterAlt={posterImageAlt} webm={heroWebm} mp4={heroMp4}>
+      <p class="eyebrow">{durationMinutes}-minute headline show</p>
+      <h1>{titlePrefix}<span class="accent-word">{shortTitle}</span></h1>
+      <p class="lede">{tagline}</p>
+      <div class="hero-actions">
+        <a class="button button--primary" href="/contact">Enquire about this show</a>
+      </div>
+    </HeroVideo>
+  </section>
+
+  <section class="show-body">
+    <div class="wrap show-body-grid">
+      <article class="prose">
+        <Content />
+      </article>
+      <aside class="setlist">
+        <h2>Setlist highlights</h2>
+        <ul>
+          {songs.map((song) => <li>{song}</li>)}
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+    {promoVideoId && (
+    <section class="show-video">
+      <div class="wrap video-wrap">
+        <YouTubeEmbed id={promoVideoId} title={`${title} — promo video`} />
+      </div>
+    </section>
+  )}
+
+  {duoImage && (
+    <section class="show-photo">
+      <div class="wrap">
+        <Image src={duoImage} alt={duoImageAlt ?? title} width={1200} height={800} />
+      </div>
+    </section>
+  )}
+
+  {testimonials.length > 0 && (
+    <section class="show-testimonials">
+      <div class="wrap testimonial-grid">
+        {testimonials.map((t) => <TestimonialCard testimonial={t} />)}
+      </div>
+    </section>
+  )}
+
+  <section class="accompanying">
+    <div class="wrap">
+      <p class="eyebrow">Pairs well with</p>
+      <h2>Build a full-length programme</h2>
+      <div class="accompanying-grid">
+        {accompanying.map((other) => other && (
+          <a class="accompanying-card" href={`/shows/${other.id}`}>
+            <span class="accompanying-title">{other.data.title}</span>
+            <span class="accompanying-link">See the show &rarr;</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* HeroVideo's own min-height and internal spacing handle the hero's
+     vertical rhythm — the sitewide `section { padding-block }` rule
+     would otherwise inset it, breaking the full-bleed edge-to-edge
+     video/image. */
+  .show-hero {
+    padding-block: 0;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .show-video {
+    padding-block: 0 var(--space-section);
+  }
+
+  .video-wrap {
+    max-width: 50rem;
+  }
+
+  .show-body-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .prose :global(p) {
+    max-width: 60ch;
+  }
+
+  .setlist {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem;
+  }
+
+  .setlist h2 {
+    font-size: var(--step-h3);
+    margin-bottom: 1rem;
+  }
+
+  .setlist ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .setlist li {
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.95rem;
+    color: var(--text-dim);
+  }
+
+  .show-photo :global(img) {
+    border-radius: 14px;
+    width: 100%;
+    height: auto;
+  }
+
+  .testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.5rem;
+  }
+
+  .accompanying-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .accompanying-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--surface-raised);
+  }
+
+  .accompanying-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+  }
+
+  .accompanying-link {
+    color: var(--accent);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 900px) {
+    .show-body-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

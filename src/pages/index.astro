@@ -1,0 +1,287 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ShowCard from '../components/ShowCard.astro';
+import NewsletterSignup from '../components/NewsletterSignup.astro';
+import heroImage from '../assets/live/manchesters-live-01.jpg';
+import introImage from '../assets/live/manchesters-live-04.jpeg';
+
+export const prerender = true;
+
+const shows = (await getCollection('shows', ({ data }) => data.published)).sort(
+  (a, b) => a.data.order - b.data.order
+);
+---
+
+<BaseLayout
+  title="Guest entertainers working aboard Cunard, Seabourn, P&O, Ponant, Windstar and NCL"
+  description="The Manchesters are West End performers presenting The Story of Fleetwood Mac, The Story of Queen and Tribute Mad as guest entertainers aboard cruise ships and in theatres."
+>
+  <section class="hero">
+    <Image src={heroImage} alt="Rachel and Peter Manchester performing live under stage lighting" class="hero-image" width={1800} height={1200} priority />
+    <div class="spotlight spotlight--one" aria-hidden="true"></div>
+    <div class="spotlight spotlight--two" aria-hidden="true"></div>
+    <div class="hero-scrim"></div>
+    <div class="wrap hero-content">
+      <p class="eyebrow">West End performers, on stages and at sea</p>
+      <h1>Legendary bands.<br />Told live. <span class="accent-word">Full blast.</span></h1>
+      <p class="lede">
+        West End Performers <span class="accent-word">The Manchesters</span> tell the <br/>real stories behind the legendary rock bands <br/><span class="h3-styling accent-word">Fleetwood Mac</span> and <span class="h3-styling accent-word">Queen</span>.
+      </p>
+      <div class="hero-actions">
+        <a class="button button--primary" href="/shows">Explore the shows</a>
+        <a class="button button--ghost" href="/contact">Book us</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="intro">
+    <div class="wrap intro-grid">
+      <div class="intro-copy">
+        <p class="eyebrow">Who we are</p>
+        <p class="lede">
+          The Manchesters are a musical-comedy-storytelling act working in theatres across the UK and as guest entertainers aboard
+          cruise ships. With two decades of professional theatre
+          experience, West End and TV and Film credits, the couple produce some of the most engaging musical tribute shows in the world at the moment.
+        </p>
+        <p>
+          Their latest Myths Behind the Music series includes <a href="/shows/fleetwood-mac">The Story of Fleetwood Mac</a> and
+          <a href="/shows/queen">The Story of Queen</a> — two of the most entertaining, informative and amusing
+          tribute shows in theatres today. They also perform <a href="/shows/tribute-mad">Tribute Mad</a>, a
+          hilarious multi-artist tribute show showcasing their range as vocalists, musicians and comedians.
+        </p>
+      </div>
+      <div class="intro-media">
+        <Image src={introImage} alt="Rachel and Peter Manchester performing live" width={1000} height={750} />
+      </div>
+    </div>
+  </section>
+
+  <section class="shows">
+    <div class="wrap">
+      <p class="eyebrow">The shows</p>
+      <h2>Three headline shows for <span class="accent-word">unforgettable</span> entertainment.</h2>
+      <div class="shows-grid">
+        {shows.map((show) => <ShowCard show={show} />)}
+      </div>
+    </div>
+  </section>
+
+  <section class="newsletter-section">
+    <div class="wrap newsletter-grid">
+      <div>
+        <p class="eyebrow">Stay in the loop</p>
+        <h2>Tour dates and sailings, before anyone else.</h2>
+      </div>
+      <NewsletterSignup />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .h3-styling {
+      font-size: var(--step-h3);
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 800;
+      line-height: 1.05;
+      margin: 0 0 0.5em;
+      letter-spacing: -0.01em;
+  }
+  .hero {
+    position: relative;
+    min-height: 90vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .hero :global(.hero-image) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    animation: hero-zoom 18s ease-in-out infinite alternate;
+  }
+
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.08);
+    }
+  }
+
+  .hero-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 8, 16, 0.45) 0%, rgba(10, 8, 16, 0.72) 45%, var(--ink) 92%);
+  }
+
+  /* Two soft, slow-drifting gel lights, like stage spots sweeping the
+     hero image — a small nod to the "gel lighting hitting the stage"
+     brand concept, kept subtle enough not to fight the photo. */
+  .spotlight {
+    position: absolute;
+    width: 45vw;
+    height: 45vw;
+    max-width: 32rem;
+    max-height: 32rem;
+    border-radius: 50%;
+    filter: blur(60px);
+    mix-blend-mode: screen;
+    opacity: 0.22;
+    pointer-events: none;
+  }
+
+  .spotlight--one {
+    top: -10%;
+    left: -5%;
+    background: radial-gradient(circle, var(--coral), transparent 70%);
+    animation: drift-one 22s ease-in-out infinite;
+  }
+
+  .spotlight--two {
+    bottom: -15%;
+    right: -5%;
+    background: radial-gradient(circle, var(--cyan), transparent 70%);
+    animation: drift-two 26s ease-in-out infinite;
+  }
+
+  @keyframes drift-one {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(8vw, 6vh);
+    }
+  }
+
+  @keyframes drift-two {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-6vw, -8vh);
+    }
+  }
+
+  .hero-content {
+    position: relative;
+    padding-bottom: 5rem;
+    max-width: 46rem;
+  }
+
+  /* Belt-and-braces legibility: the scrim gradient darkens the photo
+     overall, but a soft drop shadow keeps the type crisp regardless of
+     exactly what's behind it at any given point (a bright shoulder, a
+     mic, stage haze). */
+  .hero-content .eyebrow,
+  .hero-content h1,
+  .hero-content .lede {
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+  }
+
+  /* The sitewide .lede is deliberately dimmed (--text-dim) for
+     hierarchy against a plain background, but over the hero photo
+     that reads as low-contrast — brighten it back up to full cream
+     here specifically. */
+  .hero-content .lede {
+    color: var(--cream);
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .intro {
+    padding-top: 75px;
+  }
+
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 0.9fr;
+    gap: 4rem;
+    align-items: stretch;
+  }
+
+  .intro-media {
+    position: relative;
+  }
+
+  /* A second, solid card in cyan sits behind the photo, offset down
+     and to the right — a flat, graphic "layered card" look instead
+     of a fade, in the same brand colour used elsewhere for accents. */
+  .intro-media::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--cyan);
+    border-radius: 16px;
+    transform: translate(3%, 4%);
+  }
+
+  /* Cropped to roughly match the text column's height rather than
+     running tall and portrait. */
+  .intro-media :global(img) {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid var(--coral);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  }
+
+  .intro-copy {
+    max-width: 32rem;
+  }
+
+  @media (max-width: 780px) {
+    .intro-grid {
+      grid-template-columns: 1fr;
+    }
+
+    /* The "stretch to match the text column" trick only applies
+       within the two-column grid row — once stacked, .intro-media
+       needs its own explicit shape instead. */
+    .intro-media {
+      aspect-ratio: 4 / 3;
+      max-width: 26rem;
+      margin-inline: auto;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  .shows-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.75rem;
+    margin-top: 2.5rem;
+  }
+
+  .newsletter-section {
+    background: var(--ink-soft);
+  }
+
+  .newsletter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  @media (max-width: 780px) {
+    .newsletter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

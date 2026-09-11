@@ -1,0 +1,74 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ClientLogos from '../components/ClientLogos.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
+
+export const prerender = true;
+
+const clients = (await getCollection('clients')).sort((a, b) => a.data.order - b.data.order);
+const cruiseLines = clients.filter((c) => c.data.category === 'cruise-line');
+const others = clients.filter((c) => c.data.category === 'other');
+const testimonials = await getCollection('testimonials');
+---
+
+<BaseLayout
+  title="Customers"
+  description="Some of the cruise lines and organisations The Manchesters have performed for, and what their guests have said."
+>
+  <section class="page-hero">
+    <div class="wrap">
+      <p class="eyebrow">Previous customers</p>
+      <h1>Some of our most recent happy customers and employers</h1>
+    </div>
+  </section>
+
+  <section class="clients-section">
+    <div class="wrap">
+      <h2>Cruise lines</h2>
+      <ClientLogos clients={cruiseLines} />
+      <h2 class="second">Other engagements</h2>
+      <ClientLogos clients={others} />
+    </div>
+  </section>
+
+  <section class="testimonials-section">
+    <div class="wrap">
+      <p class="eyebrow">What audience members say</p>
+      <h2>In their own words</h2>
+      <div class="testimonial-grid">
+        {testimonials.map((t) => <TestimonialCard testimonial={t} />)}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Adjacent sections each carry their own top *and* bottom padding from
+     the sitewide `section { padding-block }` rule, so two consecutive
+     sections stack into one doubled gap. Zeroing the trailing edge here
+     leaves just the next section's own top padding as the gap. */
+  .page-hero {
+    padding: 3rem 0 0;
+  }
+
+  .clients-section {
+    padding-bottom: 0;
+  }
+
+  .clients-section h2 {
+    font-size: var(--step-h3);
+    margin-bottom: 1.5rem;
+  }
+
+  .clients-section h2.second {
+    margin-top: 3rem;
+  }
+
+  .testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+</style>

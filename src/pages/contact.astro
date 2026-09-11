@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EnquiryForm from '../components/EnquiryForm.astro';
+
+export const prerender = true;
+---
+
+<BaseLayout
+  title="Book us"
+  description="Get in touch about booking The Manchesters for your cruise ship, theatre or venue."
+>
+  <section class="page-hero">
+    <div class="wrap page-hero-grid">
+      <div>
+        <p class="eyebrow">For Guest Ent Slots or Bookings</p>
+        <h1><span class="accent-word">Tell us</span> about your theatre, season or ship.</h1>
+        <p class="lede">
+          We'll come back to you with availability, tech requirements and riders. <br/>For urgent enquiries, email us directly at 
+          <br/><a href="mailto:bookings@the-manchesters.com">bookings@the-manchesters.com</a>.
+          <br/><br/>For bookings via our cruise agent, please contact <a href="mailto:gary@garyparkes.com">gary@garyparkes.com</a>
+          <br/><br/>For Acting and UK Theatre Bookings please contact <a href="mailto:lois@harveystein.co.uk">lois@harveystein.co.uk</a>
+        </p>
+      </div>
+      <EnquiryForm />
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-top: 3rem;
+  }
+
+  .page-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .page-hero-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

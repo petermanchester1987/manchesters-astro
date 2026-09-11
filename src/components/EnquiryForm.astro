@@ -1,0 +1,130 @@
+---
+---
+
+<form class="enquiry" data-enquiry-form novalidate>
+  <div class="row">
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" name="name" type="text" required autocomplete="name" />
+    </div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required autocomplete="email" />
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="field">
+      <label for="organisation">Cruise line, theatre or venue</label>
+      <input id="organisation" name="organisation" type="text" />
+    </div>
+    <div class="field">
+      <label for="show">Which show?</label>
+      <select id="show" name="show">
+        <option value="Not sure yet">Not sure yet</option>
+        <option value="The Story of Fleetwood Mac">The Story of Fleetwood Mac</option>
+        <option value="The Story of Queen">The Story of Queen</option>
+        <option value="Tribute Mad">Tribute Mad</option>
+        <option value="More than one">More than one</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="field">
+    <label for="message">Message</label>
+    <textarea id="message" name="message" rows="5" required></textarea>
+  </div>
+
+  <!-- Honeypot -->
+  <input type="text" name="company_website" class="visually-hidden" tabindex="-1" autocomplete="off" />
+
+  <button type="submit" class="button button--primary">Send enquiry</button>
+  <p class="status" role="status" aria-live="polite"></p>
+</form>
+
+<style>
+  .enquiry {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    max-width: 40rem;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  label {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  input,
+  select,
+  textarea {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    padding: 0.8em 1em;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: rgba(244, 242, 236, 0.06);
+    color: var(--text);
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  .status {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 640px) {
+    .row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-enquiry-form]');
+
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const status = form.querySelector<HTMLParagraphElement>('.status');
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    const formData = new FormData(form);
+
+    if (status) status.textContent = 'Sending…';
+    if (button) button.disabled = true;
+
+    try {
+      const response = await fetch('/api/enquiry', {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        form.reset();
+        if (status) status.textContent = result.message ?? "Thanks — we'll be in touch soon.";
+      } else {
+        if (status) status.textContent = result.message ?? 'Something went wrong. Please email us directly.';
+      }
+    } catch {
+      if (status) status.textContent = 'Something went wrong. Please email us directly.';
+    } finally {
+      if (button) button.disabled = false;
+    }
+  });
+</script>

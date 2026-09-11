@@ -1,0 +1,274 @@
+---
+import { getCollection } from 'astro:content';
+
+const shows = (await getCollection('shows', ({ data }) => data.published))
+  .sort((a, b) => a.data.order - b.data.order);
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a href="/" class="logo">The Manchesters</a>
+
+    <input type="checkbox" id="nav-toggle" class="nav-toggle" />
+    <label for="nav-toggle" class="nav-toggle-label">
+      <span class="visually-hidden">Open menu</span>
+      <span aria-hidden="true"></span>
+    </label>
+
+    <nav class="nav" aria-label="Primary">
+      <div class="nav-panel">
+        <div class="nav-item has-dropdown">
+          <a class="nav-link" href="/shows" aria-haspopup="true">Shows</a>
+          <div class="dropdown">
+            {shows.map((show) => (
+              <a href={`/shows/${show.id}`}>{show.data.shortTitle}</a>
+            ))}
+          </div>
+        </div>
+        <a class="nav-link" href="/about">About</a>
+        <a class="nav-link" href="/customers">Customers</a>
+        <a class="nav-link button button--primary" href="/contact">Book us</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    border-bottom: 1px solid rgba(244, 242, 236, 0.1);
+  }
+
+  /* The blurred bar background lives on a pseudo-element rather than
+     .site-header itself. backdrop-filter (like filter/transform)
+     creates a new containing block for fixed-position descendants —
+     putting it directly on .site-header would trap the fixed mobile
+     .nav overlay inside the header's own small box instead of letting
+     it cover the full viewport. */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: color-mix(in srgb, var(--ink) 88%, transparent);
+    backdrop-filter: blur(10px);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 1.1rem;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.4rem;
+    color: var(--cream);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 1.75rem;
+  }
+
+  /* On desktop this wrapper is transparent to layout — its children
+     sit directly in the .nav flex row. On mobile (below) it becomes
+     the actual sliding panel, separate from .nav itself. */
+  .nav-panel {
+    display: contents;
+  }
+
+  .nav-link {
+    position: relative;
+    font-family: var(--font-sans);
+    font-size: 0.98rem;
+    color: var(--cream-dim);
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .nav-link:hover {
+    color: var(--cream);
+  }
+
+  .nav-link:not(.button)::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1px;
+    background: var(--coral);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+
+  .nav-link:not(.button):hover::after,
+  .nav-link:not(.button):focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  .has-dropdown {
+    position: relative;
+  }
+
+  /* Bridges the visual gap above the dropdown so the mouse stays
+     "inside" .has-dropdown while crossing from the button down into
+     the menu — without this, hover is lost in the gap and the
+     dropdown closes before the pointer ever reaches it. */
+  .has-dropdown::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    height: 1rem;
+  }
+
+  .dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 1rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--ink-soft);
+    border: 1px solid rgba(244, 242, 236, 0.14);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    min-width: 12rem;
+    flex-direction: column;
+  }
+
+  .has-dropdown:hover .dropdown,
+  .has-dropdown:focus-within .dropdown {
+    display: flex;
+  }
+
+  .dropdown a {
+    padding: 0.6rem 0.9rem;
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--cream-dim);
+    font-size: 0.95rem;
+    white-space: nowrap;
+  }
+
+  .dropdown a:hover {
+    background: rgba(244, 242, 236, 0.06);
+    color: var(--cream);
+  }
+
+  .nav-toggle,
+  .nav-toggle-label {
+    display: none;
+  }
+
+  @media (max-width: 780px) {
+    /* The checkbox itself stays visually hidden (the label is the
+       visible hamburger button) but must stay in the tab order and
+       keep native checkbox keyboard support — display:none would
+       remove it from the accessibility tree entirely and make the
+       menu impossible to open without a mouse. */
+    .nav-toggle {
+      display: block;
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .nav-toggle-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      cursor: pointer;
+      padding: 0.5rem;
+      z-index: 2;
+    }
+
+    .nav-toggle:focus-visible + .nav-toggle-label {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+
+    .nav-toggle-label span:not(.visually-hidden) {
+      width: 22px;
+      height: 2px;
+      background: var(--cream);
+      display: block;
+    }
+
+    /* The outer .nav is a viewport-sized clip box that never itself
+       moves or grows past the screen edge. The sliding animation
+       happens on .nav-panel inside it, so the off-screen "closed"
+       state is clipped away by overflow:hidden here instead of
+       physically sitting off to the right of the document — which is
+       what was letting the page rubber-band/scroll horizontally on
+       mobile even with overflow-x:hidden on the body. .nav itself
+       has no visible content, so pointer-events are disabled on it
+       and re-enabled only on the panel, letting clicks pass through
+       to the page underneath while the menu is closed. */
+    .nav {
+      position: fixed;
+      inset: 0;
+      top: 68px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .nav-panel {
+      display: flex;
+      position: absolute;
+      inset: 0;
+      background: var(--ink);
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 2rem;
+      gap: 1.5rem;
+      transform: translateX(100%);
+      transition: transform 0.25s ease, visibility 0s linear 0.25s;
+      pointer-events: auto;
+      /* Off-screen via transform alone still leaves the links focusable —
+         a keyboard user tabbing through the closed menu would land on
+         invisible controls. visibility:hidden removes them from the tab
+         order while closed; the transition-delay lets it stay visible
+         through the close animation instead of vanishing early. */
+      visibility: hidden;
+    }
+
+    .nav-toggle:checked ~ .nav .nav-panel {
+      transform: translateX(0);
+      visibility: visible;
+      transition: transform 0.25s ease;
+    }
+
+    .dropdown {
+      display: flex;
+      position: static;
+      transform: none;
+      background: none;
+      border: none;
+      padding: 0.5rem 0 0 1rem;
+    }
+
+    /* The hover bridge is desktop-only — on mobile the dropdown sits
+       static in-flow already, so the bridge would just overlay the
+       first item and swallow its tap. */
+    .has-dropdown::after {
+      content: none;
+    }
+  }
+</style>

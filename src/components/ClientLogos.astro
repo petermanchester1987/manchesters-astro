@@ -1,0 +1,105 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  clients: CollectionEntry<'clients'>[];
+}
+const { clients } = Astro.props;
+---
+
+<ul class="logo-grid">
+  {clients.map((client) => (
+    <li>
+      {client.data.logo ? (
+        <>
+          <span
+            class="logo-mark"
+            style={`--logo-url: url(${client.data.logo.src})`}
+            role="img"
+            aria-label={client.data.name}
+          />
+          <span class="client-name">{client.data.name}</span>
+        </>
+      ) : (
+        <span class="wordmark">{client.data.logoText ?? client.data.name}</span>
+      )}
+    </li>
+  ))}
+</ul>
+
+<style>
+  .logo-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: 1.5rem;
+  }
+
+  li {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-raised);
+    transition: transform 0.25s ease, border-color 0.25s ease;
+  }
+
+  li:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--text-dim);
+    text-align: center;
+    transition: color 0.25s ease;
+  }
+
+  li:hover .wordmark {
+    color: var(--accent);
+  }
+
+  /* The source artwork is solid-black marks, which would vanish
+     against this dark theme's tiles. Rendering them as a CSS mask
+     (rather than filtering the raster/vector image) means the visible
+     colour is exact and fully our own to control — cream by default,
+     shifting to the brand accent on hover — instead of an
+     approximation via invert()/hue-rotate() filters. */
+  .logo-mark {
+    display: block;
+    width: 100%;
+    max-width: 8rem;
+    height: 2.5rem;
+    background-color: var(--cream);
+    -webkit-mask-image: var(--logo-url);
+    mask-image: var(--logo-url);
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    opacity: 0.85;
+    transition: background-color 0.25s ease, opacity 0.25s ease;
+  }
+
+  li:hover .logo-mark {
+    background-color: var(--accent);
+    opacity: 1;
+  }
+
+  .client-name {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+</style>

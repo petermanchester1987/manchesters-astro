@@ -1,0 +1,214 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import duoImage from '../assets/live/manchesters-live-02.jpg';
+import rachelImage from '../assets/shows/rachel-headshot.jpeg';
+import peterImage from '../assets/shows/peter-headshot.jpg';
+export const prerender = true;
+---
+
+<BaseLayout
+  title="About us"
+  description="Rachel and Peter Manchester met at sixth form, trained at two of the world's most prestigious drama schools, and have spent a decade performing together on the world's most exclusive cruise ships."
+>
+  <section class="page-hero">
+    <div class="spotlight spotlight--one" aria-hidden="true"></div>
+    <div class="spotlight spotlight--two" aria-hidden="true"></div>
+    <div class="wrap">
+      <div class="page-hero-copy">
+        <p class="eyebrow">About us</p>
+        <h1>Our mission: <br/><span class="accent-word">make people happier</span> through interesting &amp; <span class="accent-word">highly entertaining</span> shows.</h1>
+        <p class="lede">
+          We bring the stories and beauty of well-known music and musicians to life — aiming to
+          educate and entertain with the stories behind the songs, while giving every audience a
+          great time.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="story">
+    <div class="wrap story-grid">
+      <div class="story-copy">
+        <h2>Their story</h2>
+        <p>
+          Rachel and Peter are a married couple who (amazingly) love working together. They met at
+          sixth form college, age sixteen, in the North West of England, where they sang in the
+          same choirs, played in the same bands and appeared in the same theatre shows — but
+          didn't get together until after they went to Drama School.
+        </p>
+        <p>
+          They trained at two of the most prestigious drama schools in the world: Rachel studied
+          acting at Guildford School of Acting, and Peter studied acting at the Royal Central
+          School of Speech and Drama. After graduating, they both worked extensively in theatre
+          around the UK and Europe, appearing in the West End and in shows and theatres including
+          Les Mis&eacute;rables, The Crucible, The Recruiting Officer and A Midsummer Night's Dream,
+          at venues including the London Palladium, the Royal Albert Hall, the Barbican, the Donmar
+          Warehouse and the Theatre Royal Bath.
+        </p>
+        <p>
+          It took them three years to realise they should be performing together, and that they
+          loved travelling the world as a team. Since then, they've never looked back — continuing
+          to travel, meet interesting people, and perform in new places, including a decade
+          onboard the world's most exclusive cruise ships.
+        </p>
+      </div>
+      <div class="story-media">
+        <Image src={duoImage} alt="Rachel and Peter Manchester performing live" width={900} height={1100} />
+      </div>
+    </div>
+  </section>
+
+  <section class="performers">
+    <div class="wrap">
+      <p class="eyebrow">The performers</p>
+      <h2>Two actors, singers and multi-instrumentalists</h2>
+      <div class="performer-grid">
+        <article class="performer">
+          <Image src={rachelImage} alt="Rachel and Peter Manchester" width={700} height={700} />
+          <h3>Rachel Manchester</h3>
+          <p class="role">Vocals, flute, woodwinds</p>
+          <p>
+            After graduating from Guildford School of Acting, Rachel performed in a vast amount of
+            classical theatre including Sense and Sensibility and The Crucible, at the Theatre
+            Royal Bath and in Stratford-upon-Avon, in Casanova in Venice, and on a UK tour of The Snow Queen. She has been singing for many years and has
+            worked for a decade alongside Peter as a professional entertainer. She is inherently
+            musical and has played the flute since she was very young, took up the saxophone at a
+            later age, and now even plays wind synth.
+          </p>
+        </article>
+        <article class="performer">
+          <Image src={peterImage} alt="Rachel and Peter Manchester" width={700} height={700} />
+          <h3>Peter Manchester</h3>
+          <p class="role">Vocals, guitars, keys</p>
+          <p>
+            Following graduation from the Royal Central School of Speech and Drama, Peter went on
+            to work in Les Mis&eacute;rables in the West End and on tour, and in many more musicals
+            including 20th Century Boy and Mods and Rox, in plays including A Midsummer Night's Dream,
+            and The Recruiting Officer at venues including the Donmar Warehouse
+            and the London Palladium for the Royal Variety Show, the Classic Music Awards and the Royal Albert Hall. Peter
+            is a self-taught guitarist, picking up his first guitar at age four, followed shortly
+            by double bass, piano and various other stringed instruments — he's been singing since
+            he was a youngster.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="wrap cta-inner">
+      <h2>See more about the shows</h2>
+      <a class="button button--primary" href="/shows">Explore the shows</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    position: relative;
+    overflow: hidden;
+    padding-top: 3rem;
+  }
+
+  .page-hero-copy {
+    position: relative;
+    max-width: 50rem;
+  }
+
+  /* Two soft, slow-drifting gel lights — the same "arena rock poster"
+     spotlight treatment as the homepage hero, filling the open space
+     beside the hero copy on wide screens instead of leaving it bare. */
+  .spotlight {
+    position: absolute;
+    width: 28rem;
+    height: 28rem;
+    border-radius: 50%;
+    filter: blur(70px);
+    mix-blend-mode: screen;
+    opacity: 0.24;
+    pointer-events: none;
+  }
+
+  /* Fixed rem offsets (not percentages) so the glow lands in the same
+     visible spot regardless of how tall the heading makes this
+     section — a percentage-based offset would get pushed mostly out
+     of view whenever the heading wraps to extra lines. */
+  .spotlight--one {
+    top: 1rem;
+    right: -6rem;
+    background: radial-gradient(circle, var(--coral), transparent 70%);
+    animation: page-hero-drift-one 24s ease-in-out infinite;
+  }
+
+  .spotlight--two {
+    top: 12rem;
+    right: 4rem;
+    background: radial-gradient(circle, var(--cyan), transparent 70%);
+    animation: page-hero-drift-two 28s ease-in-out infinite;
+  }
+
+  @keyframes page-hero-drift-one {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(-5%, 8%);
+    }
+  }
+
+  @keyframes page-hero-drift-two {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    50% {
+      transform: translate(6%, -8%);
+    }
+  }
+
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  .story-media :global(img) {
+    border-radius: 14px;
+    width: 100%;
+    height: auto;
+  }
+
+  .performer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .performer :global(img) {
+    display: block;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin: 0 auto 1.25rem;
+  }
+
+  .role {
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .cta-inner {
+    text-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .story-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

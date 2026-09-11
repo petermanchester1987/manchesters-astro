@@ -1,0 +1,43 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  testimonial: CollectionEntry<'testimonials'>;
+}
+const { quote, attribution, source } = Astro.props.testimonial.data;
+---
+
+<figure class="testimonial">
+  <blockquote>&ldquo;{quote}&rdquo;</blockquote>
+  <figcaption>{attribution} &mdash; <cite>{source}</cite></figcaption>
+</figure>
+
+<style>
+  .testimonial {
+    margin: 0;
+    padding: 1.75rem;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    height: 100%;
+  }
+
+  blockquote {
+    margin: 0 0 1rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: var(--step-lede);
+    color: var(--text);
+  }
+
+  figcaption {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+
+  cite {
+    font-style: normal;
+    color: var(--accent);
+  }
+</style>

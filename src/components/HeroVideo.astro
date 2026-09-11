@@ -1,0 +1,247 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  /** Always-rendered background image — the entire visual when there's
+   * no video yet, and the <video>'s poster frame once there is one. */
+  poster: ImageMetadata;
+  posterAlt: string;
+  /** Public-relative paths, e.g. "/videos/fleetwood-mac.webm". Omit
+   * either (or both) to fall back to the poster image alone. */
+  webm?: string;
+  mp4?: string;
+}
+
+const { poster, posterAlt, webm, mp4 } = Astro.props;
+const hasVideo = Boolean(webm || mp4);
+---
+
+<div class="hero-media">
+  <Image src={poster} alt={posterAlt} width={1800} height={1200} class="hero-media-image" priority />
+
+  {hasVideo && (
+    <video
+      class="hero-media-video"
+      data-hero-video
+      data-webm={webm}
+      data-mp4={mp4}
+      muted
+      loop
+      playsinline
+      preload="none"
+      aria-hidden="true"
+      tabindex="-1"
+    ></video>
+  )}
+
+  <div class="hero-media-scrim"></div>
+
+  <div class="wrap hero-media-content">
+    <slot />
+  </div>
+
+  {hasVideo && (
+    <button
+      type="button"
+      class="hero-media-toggle"
+      data-hero-video-toggle
+      hidden
+      aria-label="Pause background video"
+      title="Pause background video"
+    >
+      <svg
+        data-hero-video-icon-pause
+        class="hero-media-toggle-icon"
+        viewBox="0 0 16 16"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+        <rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor" />
+      </svg>
+      <svg
+        data-hero-video-icon-play
+        class="hero-media-toggle-icon is-hidden"
+        viewBox="0 0 16 16"
+        width="16"
+        height="16"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M4 2.3v11.4c0 .84.9 1.36 1.62.94l9.5-5.7a1.08 1.08 0 0 0 0-1.88l-9.5-5.7A1.08 1.08 0 0 0 4 2.3z" fill="currentColor" />
+      </svg>
+    </button>
+  )}
+</div>
+
+<style>
+  .hero-media {
+    position: relative;
+    min-height: 78vh;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+
+  .hero-media :global(.hero-media-image),
+  .hero-media-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The poster <Image> underneath is the entire visual until the script
+     below decides it's safe (motion allowed, connection not
+     save-data/slow) to fetch and play the video — so the hero looks and
+     works correctly with JS disabled, on a metered connection, or
+     before any video file has even been supplied yet. */
+  .hero-media-video {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  .hero-media-video.is-playing {
+    opacity: 1;
+  }
+
+  .hero-media-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(10, 8, 16, 0.35) 0%, rgba(10, 8, 16, 0.6) 45%, var(--ink) 92%);
+  }
+
+  .hero-media-content {
+    position: relative;
+    padding-bottom: 5rem;
+    max-width: 46rem;
+  }
+
+  /* This region sits over the video/photo + dark scrim on every show
+     page, regardless of that show's own light-or-dark accent variant —
+     so its text is always styled for a dark background here, overriding
+     whatever --text/--eyebrow-color/--accent-word-color the page's
+     accent variant defines for its (differently themed) body copy. */
+  .hero-media-content :global(.eyebrow),
+  .hero-media-content :global(h1),
+  .hero-media-content :global(.lede) {
+    color: var(--cream);
+    text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+  }
+
+  .hero-media-content :global(.eyebrow) {
+    color: var(--cyan);
+  }
+
+  .hero-media-content :global(.accent-word) {
+    color: var(--coral);
+  }
+
+  .hero-media-toggle {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.5rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(244, 242, 236, 0.3);
+    background: rgba(16, 20, 43, 0.55);
+    backdrop-filter: blur(6px);
+    color: var(--cream);
+    cursor: pointer;
+  }
+
+  .hero-media-toggle:hover,
+  .hero-media-toggle:focus-visible {
+    border-color: var(--cream);
+  }
+
+  .hero-media-toggle-icon.is-hidden {
+    display: none;
+  }
+
+  @media (max-width: 780px) {
+    .hero-media {
+      min-height: 60vh;
+    }
+  }
+</style>
+
+<script>
+  // Progressive enhancement, most-restrictive-first: the <video> element
+  // starts with no <source> children (see the .astro template above), so
+  // nothing is fetched unless every condition below is met. Autoplaying,
+  // looping background video is exactly the kind of motion
+  // prefers-reduced-motion and Data Saver exist to suppress.
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const connection = (navigator as unknown as { connection?: { saveData?: boolean; effectiveType?: string } })
+    .connection;
+  const saveData = Boolean(connection?.saveData);
+  const isSlowConnection = Boolean(connection?.effectiveType && /^(slow-2g|2g)$/.test(connection.effectiveType));
+
+  if (!prefersReducedMotion && !saveData && !isSlowConnection) {
+    document.querySelectorAll<HTMLVideoElement>('[data-hero-video]').forEach((video) => {
+      const { webm, mp4 } = video.dataset;
+      if (!webm && !mp4) return;
+
+      if (webm) {
+        const source = document.createElement('source');
+        source.src = webm;
+        source.type = 'video/webm';
+        video.appendChild(source);
+      }
+      if (mp4) {
+        const source = document.createElement('source');
+        source.src = mp4;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+      }
+
+      video.load();
+      video
+        .play()
+        .then(() => {
+          video.classList.add('is-playing');
+
+          const toggle = video.parentElement?.querySelector<HTMLButtonElement>('[data-hero-video-toggle]');
+          const pauseIcon = toggle?.querySelector<SVGElement>('[data-hero-video-icon-pause]');
+          const playIcon = toggle?.querySelector<SVGElement>('[data-hero-video-icon-play]');
+          if (!toggle || !pauseIcon || !playIcon) return;
+
+          const setState = (playing: boolean) => {
+            const label = playing ? 'Pause background video' : 'Play background video';
+            toggle.setAttribute('aria-pressed', String(playing));
+            toggle.setAttribute('aria-label', label);
+            toggle.setAttribute('title', label);
+            pauseIcon.classList.toggle('is-hidden', !playing);
+            playIcon.classList.toggle('is-hidden', playing);
+          };
+
+          toggle.hidden = false;
+          setState(true);
+          toggle.addEventListener('click', () => {
+            if (video.paused) {
+              video.play();
+              setState(true);
+            } else {
+              video.pause();
+              setState(false);
+            }
+          });
+        })
+        .catch(() => {
+          // Autoplay blocked (low-power mode, some mobile browsers) —
+          // the poster image underneath is already the full visual.
+        });
+    });
+  }
+</script>

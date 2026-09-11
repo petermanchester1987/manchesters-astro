@@ -1,0 +1,130 @@
+---
+import { Font } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  bodyClass?: string;
+  image?: string;
+}
+
+const { title, description, bodyClass = '', image = '/og-image.jpg' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL} />
+    <title>{title} | The Manchesters</title>
+    <meta name="description" content={description} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={`${title} | The Manchesters`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(image, Astro.site)} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Speeds up the YouTube thumbnail request on any page using
+         <YouTubeEmbed> — harmless on pages that don't. -->
+    <link rel="preconnect" href="https://i.ytimg.com" />
+    <Font cssVariable="--font-fraunces" preload />
+    <Font cssVariable="--font-space-grotesk" preload />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'PerformingGroup',
+      name: 'The Manchesters',
+      url: 'https://www.the-manchesters.com',
+      description: 'Rachel and Peter Manchester — West End performers presenting The Story of Fleetwood Mac, The Story of Queen and Tribute Mad as guest entertainers aboard cruise ships and in theatres.',
+      email: 'bookings@the-manchesters.com',
+    })} />
+  </head>
+  <body class={bodyClass}>
+    <a href="#main" class="visually-hidden">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      const motionOff = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (!motionOff && 'IntersectionObserver' in window) {
+        const pending = new Set<HTMLElement>();
+
+        const reveal = (el: HTMLElement) => {
+          el.classList.add('is-visible');
+          pending.delete(el);
+          observer.unobserve(el);
+        };
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) reveal(entry.target as HTMLElement);
+            }
+          },
+          { threshold: 0.15, rootMargin: '150px 0px 150px 0px' }
+        );
+
+        const register = (el: HTMLElement) => {
+          el.classList.add('reveal');
+          pending.add(el);
+          observer.observe(el);
+        };
+
+        // Whole-section entrances.
+        document.querySelectorAll<HTMLElement>('main section .wrap').forEach(register);
+
+        // Staggered card entrances inside grids — each item fades in a
+        // beat after the last, instead of the whole grid popping at once.
+        document.querySelectorAll('[class*="grid"], .logo-grid').forEach((grid) => {
+          Array.from(grid.children).forEach((child, i) => {
+            if (!(child instanceof HTMLElement)) return;
+            child.style.setProperty('--reveal-i', String(i % 8));
+            register(child);
+          });
+        });
+
+        // Safety net: a very large, instantaneous scroll (Page Down, End,
+        // a fast trackpad fling, or a tool resizing the viewport for a
+        // full-page capture) can jump straight over a section without the
+        // browser ever rendering a frame where it intersects the
+        // viewport — IntersectionObserver simply never fires for it, and
+        // it would stay stuck invisible forever. This periodically
+        // double-checks anything still pending against its actual
+        // position and reveals it directly if it's already on screen or
+        // been scrolled past.
+        let ticking = false;
+        const sweep = () => {
+          ticking = false;
+          for (const el of pending) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > -window.innerHeight) {
+              reveal(el);
+            }
+          }
+        };
+        window.addEventListener(
+          'scroll',
+          () => {
+            if (!ticking) {
+              ticking = true;
+              requestAnimationFrame(sweep);
+            }
+          },
+          { passive: true }
+        );
+      }
+    </script>
+  </body>
+</html>

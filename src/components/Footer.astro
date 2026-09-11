@@ -1,0 +1,117 @@
+---
+import NewsletterSignup from './NewsletterSignup.astro';
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap grid">
+    <div class="col">
+      <p class="logo">The Manchesters</p>
+      <p class="text-dim">
+        Performers working in theatres across the UK and as guest entertainers aboard Cunard, Seabourn, P&amp;O, Ponant, Windstar and Norwegian Cruise Lines.
+      </p>
+      <p>
+        <a href="mailto:bookings@the-manchesters.com">bookings@the-manchesters.com</a>
+      </p>
+    </div>
+
+    <nav class="col" aria-label="Footer">
+      <p class="col-title">Shows</p>
+      <a href="/shows/fleetwood-mac">The Story of Fleetwood Mac</a>
+      <a href="/shows/queen">The Story of Queen</a>
+      <a href="/shows/tribute-mad">Tribute Mad</a>
+    </nav>
+
+    <nav class="col" aria-label="Footer">
+      <p class="col-title">The Manchesters</p>
+      <a href="/about">About us</a>
+      <a href="/customers">Customers</a>
+      <a href="/contact">Book us</a>
+      <a href="/accessibility">Accessibility</a>
+    </nav>
+
+    <div class="col">
+      <p class="col-title">Stay in the loop</p>
+      <p class="text-dim">New tour dates and cruise itineraries, straight to your inbox.</p>
+      <NewsletterSignup compact />
+    </div>
+  </div>
+
+  <div class="wrap bottom">
+    <p class="text-dim">&copy; {year} The Manchesters. All rights reserved.</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--ink-soft);
+    padding-block: 4rem 2rem;
+    margin-top: var(--space-section);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1.3fr;
+    gap: 2.5rem;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    /* Grid items default to min-width: auto, which stops them shrinking
+       below their content's intrinsic width — the newsletter form's
+       email input was refusing to shrink, forcing this whole column
+       (and the page) wider than the viewport on mobile. */
+    min-width: 0;
+  }
+
+  .col a {
+    color: var(--cream-dim);
+    text-decoration: none;
+    font-size: 0.95rem;
+  }
+
+  .col a:hover {
+    color: var(--cream);
+  }
+
+  .col-title {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    color: var(--cream);
+    margin: 0 0 0.3rem;
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    margin: 0;
+  }
+
+  .text-dim {
+    color: var(--cream-dim);
+    font-size: 0.92rem;
+  }
+
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(244, 242, 236, 0.1);
+  }
+
+  .credit {
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 780px) {
+    .grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+</style>
