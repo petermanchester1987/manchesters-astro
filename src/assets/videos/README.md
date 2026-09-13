@@ -5,13 +5,19 @@ no code or frontmatter changes needed. Each show looks for a file named
 after its slug:
 
 ```
-public/videos/fleetwood-mac.webm
-public/videos/fleetwood-mac.mp4
-public/videos/queen.webm
-public/videos/queen.mp4
-public/videos/tribute-mad.webm
-public/videos/tribute-mad.mp4
+src/assets/videos/fleetwood-mac.webm
+src/assets/videos/fleetwood-mac.mp4
+src/assets/videos/queen.webm
+src/assets/videos/queen.mp4
+src/assets/videos/tribute-mad.webm
+src/assets/videos/tribute-mad.mp4
 ```
+
+(These live under `src/assets/`, not `public/`, on purpose — the show
+page finds them via Vite's `import.meta.glob`, which only scans `src/`.
+An earlier version used `public/videos/` with a runtime file-existence
+check, which worked in every local test but silently found nothing in
+Vercel's build environment, so videos never appeared in production.)
 
 Add either format on its own, or both (recommended — WebM is
 significantly smaller and is what most browsers will actually use; MP4 is
