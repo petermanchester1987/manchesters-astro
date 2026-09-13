@@ -3,6 +3,9 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -13,9 +16,9 @@
   "dependencies": {
     "@astrojs/vercel": "^11.0.10",
     "astro": "^7.3.2",
-    "sharp": "^0.33.5"
+    "sharp": "^0.35.4"
   },
   "devDependencies": {
-    "@types/node": "^22.20.2"
+    "@types/node": "^24.13.4"
   }
 }
